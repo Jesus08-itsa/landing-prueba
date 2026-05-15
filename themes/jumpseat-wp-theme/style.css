@@ -1464,39 +1464,49 @@ line-height: 100%;
   transform: translateX(5px);
 }
 
-/* Mensajes de Alerta del Formulario */ 
+/* Notificación Flotante (Toast) del Formulario - Premium */ 
 .contact__message-alert { 
-  margin-top: 1.5rem; 
-  padding: 1rem; 
-  border-radius: 4px; 
+  position: fixed; /* La hace flotar sobre todo */ 
+  top: 10%; /* Posición desde arriba */ 
+  left: 50%; 
+  transform: translate(-50%, -20px); /* Centrada y ligeramente elevada para la animación */ 
+  width: 90%; 
+  max-width: 400px; 
+  padding: 1.25rem 2rem; 
+  border-radius: 8px; 
   font-weight: 600; 
   text-align: center; 
-  font-size: 0.9rem; 
-  transition: opacity 0.5s ease; 
-  animation: slideUpFade 0.4s ease forwards; 
+  font-size: 1rem; 
+  z-index: 9999; /* Garantiza que salga al frente de menús, sliders, etc. */ 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2); /* Sombra para dar profundidad */ 
+  opacity: 0; 
+  visibility: hidden; /* Oculto inicialmente */ 
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Animación tipo bounce suave */ 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 10px; 
 } 
 
+/* Estado Activo (Cuando aparece) */ 
+.contact__message-alert.show { 
+  opacity: 1; 
+  visibility: visible; 
+  transform: translate(-50%, 0); /* Baja a su posición final */ 
+} 
+
+/* Colores de Éxito */ 
 .contact__message-alert.success { 
-  background-color: rgba(70, 180, 80, 0.1); 
-  color: #46b450; 
-  border: 1px solid #46b450; 
+  background-color: #46b450; 
+  color: #ffffff; 
+  border: 1px solid #3c9b45; 
 } 
 
+/* Colores de Error */ 
 .contact__message-alert.error { 
-  background-color: rgba(220, 50, 50, 0.1); 
-  color: #dc3232; 
-  border: 1px solid #dc3232; 
-} 
-
-@keyframes slideUpFade { 
-  from { 
-    opacity: 0; 
-    transform: translateY(10px); 
-  } 
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  } 
+  background-color: #dc3232; 
+  color: #ffffff; 
+  border: 1px solid #b72929; 
 } 
 
 .contact__divider {

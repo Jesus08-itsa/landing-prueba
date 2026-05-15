@@ -265,36 +265,46 @@ document.addEventListener('DOMContentLoaded', function () {
       })
         .then(response => response.json())
         .then(data => {
-          // Remover mensajes previos si existen 
-          const existingMsg = this.querySelector('.contact__message-alert');
+          // Remover notificaciones previas del body si existen 
+          const existingMsg = document.querySelector('.contact__message-alert');
           if (existingMsg) existingMsg.remove();
 
           // Crear elemento de mensaje 
           const msgDiv = document.createElement('div');
+          // Ya no usamos 'success'/'error' como modificador de visualización directa, 
+          // sino como modificador de color. 
           msgDiv.className = `contact__message-alert ${data.success ? 'success' : 'error'}`;
-          msgDiv.textContent = data.success ? '✈️ ' + data.data : '⚠️ Error: ' + data.data;
+          msgDiv.innerHTML = data.success ? '<span>✈️</span> ' + data.data : '<span>⚠️</span> Error: ' + data.data;
 
-          // Añadirlo al final del formulario 
-          this.appendChild(msgDiv);
+          // IMPORTANTE: Añadirlo al BODY, no al formulario 
+          document.body.appendChild(msgDiv);
+
+          // Activar la animación de entrada (un pequeño delay para que el navegador procese el render) 
+          setTimeout(() => msgDiv.classList.add('show'), 10);
 
           if (data.success) {
             this.reset(); // Limpia el formulario 
-            // Desaparecer el mensaje suavemente después de 5 segundos 
+            // Desaparecer el mensaje suavemente después de 6 segundos 
             setTimeout(() => {
-              msgDiv.style.opacity = '0';
-              setTimeout(() => msgDiv.remove(), 500);
-            }, 5000);
+              msgDiv.classList.remove('show'); // Animación de salida 
+              setTimeout(() => msgDiv.remove(), 500); // Borrar del DOM 
+            }, 6000);
           }
         })
         .catch(error => {
           console.error('Error:', error);
-          const existingMsg = this.querySelector('.contact__message-alert');
+          const existingMsg = document.querySelector('.contact__message-alert');
           if (existingMsg) existingMsg.remove();
 
           const msgDiv = document.createElement('div');
           msgDiv.className = 'contact__message-alert error';
-          msgDiv.textContent = '⚠️ An unexpected error occurred.';
-          this.appendChild(msgDiv);
+          msgDiv.innerHTML = '<span>⚠️</span> An unexpected error occurred.';
+          document.body.appendChild(msgDiv);
+          setTimeout(() => msgDiv.classList.add('show'), 10);
+          setTimeout(() => {
+            msgDiv.classList.remove('show');
+            setTimeout(() => msgDiv.remove(), 500);
+          }, 6000);
         })
         .finally(() => {
           if (submitBtn) {
