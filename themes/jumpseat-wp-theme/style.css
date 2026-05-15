@@ -1113,14 +1113,15 @@ line-height: 100%;
   line-height: 1.8;
 }
 
-.with-you__comparison {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: var(--spacing-2xl);
-  position: relative;
-  padding-bottom: var(--spacing-xl);
-}
+.with-you__comparison { 
+  display: inline-flex; /* Se ajusta exactamente al ancho de los 3 textos juntos */ 
+  justify-content: center; 
+  align-items: flex-end; 
+  gap: var(--spacing-2xl); 
+  position: relative; 
+  padding-bottom: var(--spacing-xl); 
+  margin: 0 auto; /* Lo mantiene centrado en la pantalla */ 
+} 
 
 .with-you__item {
   text-align: center;
@@ -1158,18 +1159,18 @@ line-height: 100%;
   -webkit-text-fill-color: initial;
 }
 
-.with-you__line {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 2px;
-  background: var(--color-primary);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+.with-you__line { 
+  position: absolute; 
+  bottom: 0; 
+  left: 50%; 
+  transform: translateX(-50%); 
+  width: calc(100% - 8.5rem); /* Resta exactamente la mitad del ancho de los textos laterales */ 
+  height: 2px; 
+  background: var(--color-primary); 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+} 
 
 .with-you__dot {
   width: 12px;
