@@ -121,10 +121,9 @@ function jumpseat_contact_admin_menu() {
 add_action( 'admin_menu', 'jumpseat_contact_admin_menu' ); 
 
 /** 
- * Renderizar la tabla de contactos 
+ * Renderizar la tabla de contactos y manejar acciones 
  */ 
 function jumpseat_contacts_page_html() { 
-    // Verificar seguridad 
     if ( ! current_user_can( 'manage_options' ) ) { 
         return; 
     } 
@@ -132,47 +131,83 @@ function jumpseat_contacts_page_html() {
     global $wpdb; 
     $table_name = $wpdb->prefix . 'jumpseat_contacts'; 
 
-    // Consultar los datos ordenados por los más recientes 
+    // Procesar acciones (Eliminar o Cambiar Estado) 
+    if ( isset($_GET['action']) && isset($_GET['id']) && isset($_GET['_wpnonce']) ) { 
+        if ( wp_verify_nonce($_GET['_wpnonce'], 'jumpseat_action_nonce') ) { 
+            $action = sanitize_text_field($_GET['action']); 
+            $id = intval($_GET['id']); 
+
+            if ( $action === 'delete' ) { 
+                $wpdb->delete($table_name, array('id' => $id)); 
+                echo '<div class="notice notice-success is-dismissible"><p>Contacto eliminado correctamente.</p></div>'; 
+            } elseif ( $action === 'status_contactado' ) { 
+                $wpdb->update($table_name, array('status' => 'contactado'), array('id' => $id)); 
+                echo '<div class="notice notice-success is-dismissible"><p>Estado actualizado a: Contactado.</p></div>'; 
+            } elseif ( $action === 'status_descartado' ) { 
+                $wpdb->update($table_name, array('status' => 'descartado'), array('id' => $id)); 
+                echo '<div class="notice notice-warning is-dismissible"><p>Estado actualizado a: Descartado.</p></div>'; 
+            } 
+        } 
+    } 
+
+    // Consultar los datos 
     $resultados = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY created_at DESC" ); 
     ?> 
     <div class="wrap"> 
         <h1 class="wp-heading-inline">JumpSeat Inbox</h1> 
-        <p>Aquí puedes revisar todos los mensajes recibidos desde la Landing Page.</p> 
+        <p>Gestiona los mensajes recibidos. Puedes cambiar su estado o eliminarlos.</p> 
         
         <table class="wp-list-table widefat fixed striped" style="margin-top: 20px;"> 
             <thead> 
                 <tr> 
                     <th style="width: 5%;">ID</th> 
                     <th style="width: 15%;">Name</th> 
-                    <th style="width: 15%;">Last Name</th> 
-                    <th style="width: 10%;">Title</th> 
                     <th style="width: 15%;">Company</th> 
                     <th style="width: 20%;">Message</th> 
                     <th style="width: 10%;">Status</th> 
                     <th style="width: 10%;">Date</th> 
+                    <th style="width: 25%;">Actions</th> 
                 </tr> 
             </thead> 
             <tbody> 
                 <?php if ( $resultados ) : ?> 
-                    <?php foreach ( $resultados as $fila ) : ?> 
+                    <?php foreach ( $resultados as $fila ) : 
+                        // Generar URLs seguras con Nonce para cada acción 
+                        $base_url = admin_url('admin.php?page=jumpseat-contacts&id=' . $fila->id); 
+                        $delete_url = wp_nonce_url($base_url . '&action=delete', 'jumpseat_action_nonce'); 
+                        $contactado_url = wp_nonce_url($base_url . '&action=status_contactado', 'jumpseat_action_nonce'); 
+                        $descartado_url = wp_nonce_url($base_url . '&action=status_descartado', 'jumpseat_action_nonce'); 
+                        
+                        // Colores para el estado 
+                        $status_color = '#ffba00'; // Pendiente (Amarillo) 
+                        if($fila->status == 'contactado') $status_color = '#46b450'; // Verde 
+                        if($fila->status == 'descartado') $status_color = '#dc3232'; // Rojo 
+                    ?> 
                         <tr> 
                             <td><?php echo esc_html( $fila->id ); ?></td> 
-                            <td><strong><?php echo esc_html( $fila->name ); ?></strong></td> 
-                            <td><?php echo esc_html( $fila->last_name ); ?></td> 
-                            <td><?php echo esc_html( $fila->title ); ?></td> 
+                            <td><strong><?php echo esc_html( $fila->name . ' ' . $fila->last_name ); ?></strong><br><small><?php echo esc_html( $fila->title ); ?></small></td> 
                             <td><?php echo esc_html( $fila->company ); ?></td> 
                             <td><?php echo esc_html( $fila->message ); ?></td> 
                             <td> 
-                                <span style="background: #ffba00; color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;"> 
+                                <span style="background: <?php echo $status_color; ?>; color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;"> 
                                     <?php echo esc_html( strtoupper($fila->status) ); ?> 
                                 </span> 
                             </td> 
                             <td><?php echo esc_html( date( 'M j, Y', strtotime($fila->created_at) ) ); ?></td> 
+                            <td> 
+                                <?php if($fila->status !== 'contactado'): ?> 
+                                    <a href="<?php echo esc_url($contactado_url); ?>" class="button button-small" style="color: #46b450; border-color: #46b450;">Contactado</a> 
+                                <?php endif; ?> 
+                                <?php if($fila->status !== 'descartado'): ?> 
+                                    <a href="<?php echo esc_url($descartado_url); ?>" class="button button-small" style="color: #dc3232; border-color: #dc3232;">Descartado</a> 
+                                <?php endif; ?> 
+                                <a href="<?php echo esc_url($delete_url); ?>" class="button button-small" onclick="return confirm('¿Estás seguro de que deseas eliminar este registro?');">Eliminar</a> 
+                            </td> 
                         </tr> 
                     <?php endforeach; ?> 
                 <?php else : ?> 
                     <tr> 
-                        <td colspan="8">No hay mensajes todavía.</td> 
+                        <td colspan="7">No hay mensajes todavía.</td> 
                     </tr> 
                 <?php endif; ?> 
             </tbody> 
