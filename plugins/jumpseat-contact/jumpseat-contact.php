@@ -121,17 +121,31 @@ function jumpseat_contact_admin_menu() {
 add_action( 'admin_menu', 'jumpseat_contact_admin_menu' ); 
 
 /** 
- * Renderizar la tabla de contactos y manejar acciones 
+ * Renderizar la tabla de contactos y manejar acciones CRUD 
  */ 
 function jumpseat_contacts_page_html() { 
-    if ( ! current_user_can( 'manage_options' ) ) { 
-        return; 
-    } 
+    if ( ! current_user_can( 'manage_options' ) ) return; 
 
     global $wpdb; 
     $table_name = $wpdb->prefix . 'jumpseat_contacts'; 
 
-    // Procesar acciones (Eliminar o Cambiar Estado) 
+    // --- 1. PROCESAR GUARDADO DE EDICIÓN --- 
+    if ( isset($_POST['jumpseat_update_contact']) && check_admin_referer('jumpseat_update_nonce') ) { 
+        $id = intval($_POST['id']); 
+        $wpdb->update( 
+            $table_name, 
+            array( 
+                'name'      => sanitize_text_field($_POST['name']), 
+                'last_name' => sanitize_text_field($_POST['last_name']), 
+                'company'   => sanitize_text_field($_POST['company']), 
+                'message'   => sanitize_textarea_field($_POST['message']) 
+            ), 
+            array('id' => $id) 
+        ); 
+        echo '<div class="notice notice-success is-dismissible"><p>Contacto editado y guardado correctamente.</p></div>'; 
+    } 
+
+    // --- 2. PROCESAR ACCIONES RÁPIDAS (Eliminar, Estados) --- 
     if ( isset($_GET['action']) && isset($_GET['id']) && isset($_GET['_wpnonce']) ) { 
         if ( wp_verify_nonce($_GET['_wpnonce'], 'jumpseat_action_nonce') ) { 
             $action = sanitize_text_field($_GET['action']); 
@@ -146,16 +160,61 @@ function jumpseat_contacts_page_html() {
             } elseif ( $action === 'status_descartado' ) { 
                 $wpdb->update($table_name, array('status' => 'descartado'), array('id' => $id)); 
                 echo '<div class="notice notice-warning is-dismissible"><p>Estado actualizado a: Descartado.</p></div>'; 
+            } elseif ( $action === 'status_pendiente' ) { 
+                $wpdb->update($table_name, array('status' => 'pendiente'), array('id' => $id)); 
+                echo '<div class="notice notice-info is-dismissible"><p>Estado revertido a: Pendiente.</p></div>'; 
             } 
         } 
     } 
 
-    // Consultar los datos 
+    // --- 3. VISTA DE EDICIÓN --- 
+    if ( isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id']) ) { 
+        $id = intval($_GET['id']); 
+        $contacto = $wpdb->get_row( $wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $id) ); 
+        if($contacto): 
+        ?> 
+        <div class="wrap"> 
+            <h1 class="wp-heading-inline">Editar Contacto</h1> 
+            <a href="<?php echo admin_url('admin.php?page=jumpseat-contacts'); ?>" class="page-title-action">Volver a la lista</a> 
+            <form method="post" action="<?php echo admin_url('admin.php?page=jumpseat-contacts'); ?>" style="margin-top: 20px; max-width: 600px;"> 
+                <?php wp_nonce_field('jumpseat_update_nonce'); ?> 
+                <input type="hidden" name="jumpseat_update_contact" value="1"> 
+                <input type="hidden" name="id" value="<?php echo esc_attr($contacto->id); ?>"> 
+                
+                <table class="form-table"> 
+                    <tr> 
+                        <th><label for="name">Name</label></th> 
+                        <td><input type="text" name="name" id="name" value="<?php echo esc_attr($contacto->name); ?>" class="regular-text"></td> 
+                    </tr> 
+                    <tr> 
+                        <th><label for="last_name">Last Name</label></th> 
+                        <td><input type="text" name="last_name" id="last_name" value="<?php echo esc_attr($contacto->last_name); ?>" class="regular-text"></td> 
+                    </tr> 
+                    <tr> 
+                        <th><label for="company">Company</label></th> 
+                        <td><input type="text" name="company" id="company" value="<?php echo esc_attr($contacto->company); ?>" class="regular-text"></td> 
+                    </tr> 
+                    <tr> 
+                        <th><label for="message">Message</label></th> 
+                        <td><textarea name="message" id="message" rows="5" class="large-text"><?php echo esc_textarea($contacto->message); ?></textarea></td> 
+                    </tr> 
+                </table> 
+                <p class="submit"> 
+                    <input type="submit" class="button button-primary" value="Guardar Cambios"> 
+                </p> 
+            </form> 
+        </div> 
+        <?php 
+        endif; 
+        return; // Detenemos la ejecución aquí para no mostrar la tabla debajo 
+    } 
+
+    // --- 4. VISTA DE TABLA PRINCIPAL --- 
     $resultados = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY created_at DESC" ); 
     ?> 
     <div class="wrap"> 
         <h1 class="wp-heading-inline">JumpSeat Inbox</h1> 
-        <p>Gestiona los mensajes recibidos. Puedes cambiar su estado o eliminarlos.</p> 
+        <p>Gestiona los mensajes recibidos. Puedes editar, cambiar su estado o eliminarlos.</p> 
         
         <table class="wp-list-table widefat fixed striped" style="margin-top: 20px;"> 
             <thead> 
@@ -172,20 +231,22 @@ function jumpseat_contacts_page_html() {
             <tbody> 
                 <?php if ( $resultados ) : ?> 
                     <?php foreach ( $resultados as $fila ) : 
-                        // Generar URLs seguras con Nonce para cada acción 
+                        // Generar URLs seguras con Nonce 
                         $base_url = admin_url('admin.php?page=jumpseat-contacts&id=' . $fila->id); 
+                        $edit_url = $base_url . '&action=edit'; 
                         $delete_url = wp_nonce_url($base_url . '&action=delete', 'jumpseat_action_nonce'); 
+                        $pendiente_url = wp_nonce_url($base_url . '&action=status_pendiente', 'jumpseat_action_nonce'); 
                         $contactado_url = wp_nonce_url($base_url . '&action=status_contactado', 'jumpseat_action_nonce'); 
                         $descartado_url = wp_nonce_url($base_url . '&action=status_descartado', 'jumpseat_action_nonce'); 
                         
-                        // Colores para el estado 
-                        $status_color = '#ffba00'; // Pendiente (Amarillo) 
+                        // Colores de estado 
+                        $status_color = '#ffba00'; // Pendiente 
                         if($fila->status == 'contactado') $status_color = '#46b450'; // Verde 
                         if($fila->status == 'descartado') $status_color = '#dc3232'; // Rojo 
                     ?> 
                         <tr> 
                             <td><?php echo esc_html( $fila->id ); ?></td> 
-                            <td><strong><?php echo esc_html( $fila->name . ' ' . $fila->last_name ); ?></strong><br><small><?php echo esc_html( $fila->title ); ?></small></td> 
+                            <td><strong><?php echo esc_html( $fila->name . ' ' . $fila->last_name ); ?></strong></td> 
                             <td><?php echo esc_html( $fila->company ); ?></td> 
                             <td><?php echo esc_html( $fila->message ); ?></td> 
                             <td> 
@@ -195,13 +256,19 @@ function jumpseat_contacts_page_html() {
                             </td> 
                             <td><?php echo esc_html( date( 'M j, Y', strtotime($fila->created_at) ) ); ?></td> 
                             <td> 
+                                <a href="<?php echo esc_url($edit_url); ?>" class="button button-small">Editar</a> 
+                                
+                                <?php if($fila->status !== 'pendiente'): ?> 
+                                    <a href="<?php echo esc_url($pendiente_url); ?>" class="button button-small" style="color: #ffba00; border-color: #ffba00;">Pendiente</a> 
+                                <?php endif; ?> 
                                 <?php if($fila->status !== 'contactado'): ?> 
                                     <a href="<?php echo esc_url($contactado_url); ?>" class="button button-small" style="color: #46b450; border-color: #46b450;">Contactado</a> 
                                 <?php endif; ?> 
                                 <?php if($fila->status !== 'descartado'): ?> 
                                     <a href="<?php echo esc_url($descartado_url); ?>" class="button button-small" style="color: #dc3232; border-color: #dc3232;">Descartado</a> 
                                 <?php endif; ?> 
-                                <a href="<?php echo esc_url($delete_url); ?>" class="button button-small" onclick="return confirm('¿Estás seguro de que deseas eliminar este registro?');">Eliminar</a> 
+                                
+                                <a href="<?php echo esc_url($delete_url); ?>" class="button button-small" onclick="return confirm('¿Eliminar registro de forma permanente?');">Eliminar</a> 
                             </td> 
                         </tr> 
                     <?php endforeach; ?> 

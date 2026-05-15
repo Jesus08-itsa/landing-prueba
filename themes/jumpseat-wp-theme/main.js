@@ -92,10 +92,10 @@ document.addEventListener('DOMContentLoaded', function () {
       if (rect.top < windowHeight && rect.bottom > 0) {
         // Calcula el progreso
         const progress = (windowHeight - rect.top) / (windowHeight + rect.height);
-        
+
         // Multiplicador alto (-120) para que se mueva rápido como pediste antes
         const moveX = progress * -120;
-        
+
         feelingLostBgText.style.transform = `translateX(${moveX}%)`;
       }
     }
@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const submitBtn = this.querySelector('.contact__submit');
       let originalText = 'SEND';
-      
+
       if (submitBtn) {
         originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = 'SENDING...';
@@ -253,35 +253,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Recolectar datos del formulario
       const formData = new FormData(this);
-      
+
       // Añadir los requerimientos de WordPress AJAX
       formData.append('action', 'jumpseat_submit_form');
       formData.append('security', jumpseatAjax.nonce);
 
-      // Enviar petición al backend
+      // Enviar petición al backend 
       fetch(jumpseatAjax.url, {
-          method: 'POST',
-          body: formData
+        method: 'POST',
+        body: formData
       })
-      .then(response => response.json())
-      .then(data => {
+        .then(response => response.json())
+        .then(data => {
+          // Remover mensajes previos si existen 
+          const existingMsg = this.querySelector('.contact__message-alert');
+          if (existingMsg) existingMsg.remove();
+
+          // Crear elemento de mensaje 
+          const msgDiv = document.createElement('div');
+          msgDiv.className = `contact__message-alert ${data.success ? 'success' : 'error'}`;
+          msgDiv.textContent = data.success ? '✈️ ' + data.data : '⚠️ Error: ' + data.data;
+
+          // Añadirlo al final del formulario 
+          this.appendChild(msgDiv);
+
           if (data.success) {
-              alert(data.data); // Muestra mensaje de éxito
-              this.reset();     // Limpia el formulario
-          } else {
-              alert('Error: ' + data.data);
+            this.reset(); // Limpia el formulario 
+            // Desaparecer el mensaje suavemente después de 5 segundos 
+            setTimeout(() => {
+              msgDiv.style.opacity = '0';
+              setTimeout(() => msgDiv.remove(), 500);
+            }, 5000);
           }
-      })
-      .catch(error => {
+        })
+        .catch(error => {
           console.error('Error:', error);
-          alert('An unexpected error occurred.');
-      })
-      .finally(() => {
+          const existingMsg = this.querySelector('.contact__message-alert');
+          if (existingMsg) existingMsg.remove();
+
+          const msgDiv = document.createElement('div');
+          msgDiv.className = 'contact__message-alert error';
+          msgDiv.textContent = '⚠️ An unexpected error occurred.';
+          this.appendChild(msgDiv);
+        })
+        .finally(() => {
           if (submitBtn) {
-              submitBtn.innerHTML = originalText;
-              submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
           }
-      });
+        });
     });
   }
 

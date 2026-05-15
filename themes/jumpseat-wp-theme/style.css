@@ -1464,6 +1464,41 @@ line-height: 100%;
   transform: translateX(5px);
 }
 
+/* Mensajes de Alerta del Formulario */ 
+.contact__message-alert { 
+  margin-top: 1.5rem; 
+  padding: 1rem; 
+  border-radius: 4px; 
+  font-weight: 600; 
+  text-align: center; 
+  font-size: 0.9rem; 
+  transition: opacity 0.5s ease; 
+  animation: slideUpFade 0.4s ease forwards; 
+} 
+
+.contact__message-alert.success { 
+  background-color: rgba(70, 180, 80, 0.1); 
+  color: #46b450; 
+  border: 1px solid #46b450; 
+} 
+
+.contact__message-alert.error { 
+  background-color: rgba(220, 50, 50, 0.1); 
+  color: #dc3232; 
+  border: 1px solid #dc3232; 
+} 
+
+@keyframes slideUpFade { 
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  } 
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  } 
+} 
+
 .contact__divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.2);
