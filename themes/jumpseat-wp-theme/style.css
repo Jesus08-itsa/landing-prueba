@@ -1495,18 +1495,20 @@ line-height: 100%;
   transform: translate(-50%, 0); /* Baja a su posición final */ 
 } 
 
-/* Colores de Éxito */ 
+/* Colores de Éxito (Alineado a la marca: Cyan) */ 
 .contact__message-alert.success { 
-  background-color: #46b450; 
-  color: #ffffff; 
-  border: 1px solid #3c9b45; 
+  background-color: var(--color-cyan); 
+  color: var(--color-bg-dark); /* Texto oscuro para contrastar con el cyan claro */ 
+  border: 1px solid var(--color-cyan); 
+  box-shadow: 0 10px 25px rgba(125, 211, 216, 0.2); /* Sombra cyan sutil */ 
 } 
 
-/* Colores de Error */ 
+/* Colores de Error (Alineado a la marca: Primary/Coral) */ 
 .contact__message-alert.error { 
-  background-color: #dc3232; 
-  color: #ffffff; 
-  border: 1px solid #b72929; 
+  background-color: var(--color-primary); 
+  color: var(--color-text-white); 
+  border: 1px solid var(--color-primary-dark); 
+  box-shadow: 0 10px 25px rgba(255, 127, 127, 0.2); /* Sombra coral sutil */ 
 } 
 
 .contact__divider {
