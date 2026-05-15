@@ -1,15 +1,3 @@
-/*
-Theme Name: JumpSeat Theme
-Theme URI: https://example.com/jumpseat
-Author: Trae Assistant
-Author URI: https://trae.ai
-Description: Un tema clásico de WordPress convertido desde un diseño fluido.
-Version: 1.0
-License: GNU General Public License v2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Text Domain: jumpseat
-*/
-
 /* ========================================
    CSS Variables (Global)
    ======================================== */
@@ -82,7 +70,6 @@ body {
   color: var(--color-text-white);
   background-color: var(--color-bg-dark);
   overflow-x: hidden;
-  /* Aplicamos el renderizado suave para fuentes modernas */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -273,7 +260,7 @@ section.is-visible {
 .top-wrapper {
   position: relative;
   width: 100%;
-  overflow: hidden; /* Importante para que el fondo que se mueve no se salga */
+  overflow: hidden; 
 }
 
 .top-wrapper::after {
@@ -282,7 +269,7 @@ section.is-visible {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 20vh; /* Altura del degradado de salida */
+  height: 20vh;
   background: linear-gradient(to bottom, transparent, rgba(71, 71, 83, 1));
   pointer-events: none;
   z-index: 1;
@@ -294,7 +281,7 @@ section.is-visible {
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
-  z-index: 1; /* Asegura que el wrapper esté por encima de cualquier otro fondo base */
+  z-index: 1; 
 }
 
 .main-background-wrapper::before {
@@ -303,7 +290,7 @@ section.is-visible {
   top: 0;
   left: 0;
   width: 100%;
-  height: 20vh; /* Altura del degradado de entrada */
+  height: 20vh;
   background: linear-gradient(to bottom, rgba(71, 71, 83, 1), transparent);
   pointer-events: none;
   z-index: 2;
@@ -315,7 +302,7 @@ section.is-visible {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 20vh; /* Altura del degradado de salida */
+  height: 20vh; 
   background: linear-gradient(to top, rgba(71, 71, 83, 1), transparent);
   pointer-events: none;
   z-index: 2;
@@ -346,22 +333,22 @@ section.is-visible {
   content: '';
   position: absolute;
   top: 0;
-  left: -10%; /* Le damos un 10% de margen a la izquierda */
-  width: 120%; /* Y un 120% de ancho total para tener margen de movimiento */
+  left: -10%; 
+  width: 120%; 
   height: 100%;
-  background-image: var(--bg-image); /* Usamos la variable CSS del index.php */
+  background-image: var(--bg-image); 
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
   z-index: 0;
   will-change: transform;
   transition: transform 0.4s cubic-bezier(0.1, 0, 0.2, 1);
-  transform: translateX(var(--parallax-x, 0)); /* Usamos la variable controlada por JS */
+  transform: translateX(var(--parallax-x, 0)); 
 }
 
 .top-wrapper > * {
   position: relative;
-  z-index: 2; /* Ponemos el contenido por encima del fondo */
+  z-index: 2;
 }
 
 .hero {
@@ -416,7 +403,7 @@ section.is-visible {
   padding: var(--spacing-section) var(--container-padding);
   display: flex;
   flex-direction: column;
-  align-items: center; /* Esto centra el bloque .b2b-success__content */
+  align-items: center; 
 }
 
 .b2b-success-board {
@@ -426,7 +413,7 @@ section.is-visible {
 .b2b-success__content {
   max-width: 60vw;
   margin: 0 auto;
-  text-align: left; /* Esto alinea el texto y el botón a la izquierda dentro del bloque centrado */
+  text-align: left; 
 }
 
 .b2b-success__title {
@@ -465,9 +452,8 @@ section.is-visible {
 .departure-board {
   border-radius: 8px;
   padding: var(--spacing-lg);
-  /* MAGIA: max-content permite que la cuadrícula se expanda sin que se corten columnas */
   max-width: max-content;
-  margin: 0 auto; /* Centra el tablero en la pantalla */
+  margin: 0 auto; 
 }
 
 /* ======================================== 
@@ -485,7 +471,6 @@ section.is-visible {
   width: 3.5rem;
   height: auto;
   object-fit: contain;
-  /* Alineación sutil con el texto */
    transform: translateY(0.2rem);
 } 
 
@@ -502,14 +487,12 @@ line-height: 100%;
 
 } 
 
-/* Alineación matemática exacta para alinear títulos y celdas */
 .departure-board__labels,
 .departure-board__row {
   display: grid;
   font-family: Plus Jakarta Sans;
-  /* Time (241px) | Destination (731px) | Gate (143px) */
   grid-template-columns: 241px 731px 143px;
-  gap: 40px; /* Separación entre las columnas principales */
+  gap: 40px; 
   align-items: center;
 }
 
@@ -523,7 +506,7 @@ line-height: 100%;
 }
 
 .departure-board__label {
-  text-align: left; /* Asegura que el título inicie justo donde inician los cuadros */
+  text-align: left; 
   display: block;
 }
 
@@ -1114,13 +1097,13 @@ line-height: 100%;
 }
 
 .with-you__comparison { 
-  display: inline-flex; /* Se ajusta exactamente al ancho de los 3 textos juntos */ 
+  display: inline-flex; 
   justify-content: center; 
   align-items: flex-end; 
   gap: var(--spacing-2xl); 
   position: relative; 
   padding-bottom: var(--spacing-xl); 
-  margin: 0 auto; /* Lo mantiene centrado en la pantalla */ 
+  margin: 0 auto; 
 } 
 
 .with-you__item {
