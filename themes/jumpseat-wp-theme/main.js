@@ -234,29 +234,54 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ========================================
-  // Contact Form Handling (Basic)
+  // Contact Form Handling (AJAX)
   // ========================================
   const contactForm = document.getElementById('contactForm');
 
   if (contactForm) {
     contactForm.addEventListener('submit', function (e) {
-      // In a real WP theme, this would usually be handled by a plugin or AJAX
-      // For now, we keep the UI feedback logic
       e.preventDefault();
 
       const submitBtn = this.querySelector('.contact__submit');
+      let originalText = 'SEND';
+      
       if (submitBtn) {
-        const originalText = submitBtn.innerHTML;
+        originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = 'SENDING...';
         submitBtn.disabled = true;
-
-        setTimeout(() => {
-          submitBtn.innerHTML = originalText;
-          submitBtn.disabled = false;
-          this.reset();
-          alert('Message sent successfully! (Simulation)');
-        }, 1500);
       }
+
+      // Recolectar datos del formulario
+      const formData = new FormData(this);
+      
+      // Añadir los requerimientos de WordPress AJAX
+      formData.append('action', 'jumpseat_submit_form');
+      formData.append('security', jumpseatAjax.nonce);
+
+      // Enviar petición al backend
+      fetch(jumpseatAjax.url, {
+          method: 'POST',
+          body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              alert(data.data); // Muestra mensaje de éxito
+              this.reset();     // Limpia el formulario
+          } else {
+              alert('Error: ' + data.data);
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          alert('An unexpected error occurred.');
+      })
+      .finally(() => {
+          if (submitBtn) {
+              submitBtn.innerHTML = originalText;
+              submitBtn.disabled = false;
+          }
+      });
     });
   }
 
