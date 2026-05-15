@@ -1,0 +1,54 @@
+# Archivos y directorios generados por el sistema y el IDE
+.DS_Store
+Thumbs.db
+ehthumbs.db
+.idea/
+.vscode/
+*.log
+*.bak
+*.swp
+*~
+/.cache/
+
+# WordPress core (nunca deben ser versionados en un repositorio de temas/plugins)
+wp-admin/
+wp-includes/
+index.php
+license.txt
+readme.html
+wp-activate.php
+wp-blog-header.php
+wp-comments-post.php
+wp-config-sample.php
+wp-cron.php
+wp-links-opml.php
+wp-load.php
+wp-login.php
+wp-mail.php
+wp-settings.php
+wp-signup.php
+wp-trackback.php
+xmlrpc.php
+
+# Archivos de configuración y bases de datos sensibles
+wp-config.php
+.env
+.htaccess
+*.sql
+*.zip
+*.tar.gz
+
+# Directorios comunes no versionables
+uploads/
+upgrade/
+
+# Plugins y temas que no quieres versionar si están gestionados por Composer/SVN/etc.
+# O si no son parte de este repositorio unificado
+# plugins/nombre-de-plugin-externo/
+# themes/nombre-de-tema-externo/
+
+# Composer
+/vendor/
+
+# Node (si se usa en el proyecto)
+/node_modules/
